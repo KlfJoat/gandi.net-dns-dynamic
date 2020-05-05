@@ -3,10 +3,10 @@
 # gandi-dyndns.sh
 #     Use a Gandi.Net subdomain you own as a replacement for a DynDNS host.
 #
-# Uses Reference:
+# Uses:
 #  * https://api.gandi.net/docs/livedns/
 #
-# Shamelessly combining
+# Shamelessly cribbing
 #  * https://github.com/Gandi/api-examples/blob/master/bash/livedns/mywanip.sh
 #
 
