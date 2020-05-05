@@ -1,0 +1,13 @@
+# Goals
+#   1. Run this service periodically (timer)
+#   2. Do not run the IP update if a VPN is in use
+[Unit]
+Description=Gandi.Net Dynamic DNS Updater
+
+[Service]
+Type=oneshot
+#ExecStartPre=https://stackoverflow.com/q/61603362/3661441
+ExecStart=%h/.local/bin/gandi-dyndns.sh
+
+[Install]
+WantedBy=multi-user.target
