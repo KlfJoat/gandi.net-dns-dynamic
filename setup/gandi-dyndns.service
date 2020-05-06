@@ -7,7 +7,7 @@ Description=Gandi.Net Dynamic DNS Updater
 [Service]
 Type=oneshot
 # This will fail to run the script if you are currently on a VPN
-ExecStartPre=nmcli --get-values TYPE connection show --active | [ $(grep -c ^vpn) -eq 0 ]
+ExecStartPre=bin/sh -c '/usr/bin/nmcli --get-values type connection show --active | [ $(grep -c ^vpn) -eq 0 ]'
 ExecStart=%h/.local/bin/gandi-dyndns.sh
 
 [Install]

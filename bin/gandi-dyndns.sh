@@ -156,7 +156,8 @@ if [[ ! -z ${ipv4} ]]; then
 
   data='{"rrset_ttl": '${ttl}', "rrset_values": ["'${ipv4}'"]}'
   # Note that PUT works for subdomain creation exactly like POST does.
-  curl --request PUT \
+  curl --no-progress-meter \
+       --request PUT \
        --header "Content-Type: application/json" \
        --header "${AuthZ}" \
        --data "${data}" \
@@ -170,7 +171,8 @@ if [[ ! -z ${ipv6} ]]; then
 
   data='{"rrset_ttl": '${ttl}', "rrset_values": ["'${ipv6}'"]}'
   # Note that PUT works for subdomain creation exactly like POST does.
-  curl --request PUT \
+  curl --no-progress-meter \
+       --request PUT \
        --header "Content-Type: application/json" \
        --header "${AuthZ}" \
        --data "${data}" \
