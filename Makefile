@@ -18,8 +18,7 @@ install:
 	mkdir --parents $(PREFIX)
 	for file in $(INSTALL_FILES); do install bin/$$file $(PREFIX)/$$file; done
 	install --mode=644 setup/$(NAME).* $(XDG_CONFIG_HOME)/systemd/user/
-	systemctl --user enable $(NAME).timer
-	systemctl --user start $(NAME).timer
+	systemctl --user enable --now $(NAME).timer
 
 uninstall:
 	@if [ "$(shell id -u)" = 0 ]; then\
@@ -27,8 +26,7 @@ uninstall:
 		exit 1;\
 	fi
 	for file in $(INSTALL_FILES); do rm -f $(PREFIX)/$$file; done
-	systemctl --user stop $(NAME).timer
-	systemctl --user disable $(NAME).timer
+	systemctl --user disable --now $(NAME).timer
 	rm $(XDG_CONFIG_HOME)/systemd/user/$(NAME).*
 
 reinstall:
