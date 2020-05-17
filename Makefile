@@ -17,7 +17,8 @@ install:
 	fi
 	mkdir --parents $(PREFIX)
 	for file in $(INSTALL_FILES); do install bin/$$file $(PREFIX)/$$file; done
-	install --mode=644 setup/$(NAME).* $(XDG_CONFIG_HOME)/systemd/user/
+	mkdir --parents $(XDG_DATA_HOME)/systemd/user
+	install --mode=644 setup/$(NAME).* $(XDG_DATA_HOME)/systemd/user/
 	systemctl --user enable --now $(NAME).timer
 
 uninstall:
@@ -27,7 +28,7 @@ uninstall:
 	fi
 	for file in $(INSTALL_FILES); do rm -f $(PREFIX)/$$file; done
 	systemctl --user disable --now $(NAME).timer
-	rm $(XDG_CONFIG_HOME)/systemd/user/$(NAME).*
+	rm $(XDG_DATA_HOME)/systemd/user/$(NAME).*
 
 reinstall:
 	@if [ "$(shell id -u)" = 0 ]; then\
@@ -35,7 +36,7 @@ reinstall:
 		exit 1;\
 	fi
 	for file in $(INSTALL_FILES); do install bin/$$file $(PREFIX)/$$file; done
-	install --mode=644 setup/$(NAME).* $(XDG_CONFIG_HOME)/systemd/user/
+	install --mode=644 setup/$(NAME).* $(XDG_DATA_HOME)/systemd/user/
 	systemctl --user daemon-reload
 
 
