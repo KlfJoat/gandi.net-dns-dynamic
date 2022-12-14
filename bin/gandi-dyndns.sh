@@ -4,13 +4,13 @@
 #     Use a Gandi.Net subdomain you own as a replacement for a DynDNS host.
 #
 # Uses:
-#  * https://api.gandi.net/docs/livedns/
+#  * https://api.gandi.net/docs/
 #
 # Shamelessly cribbing
 #  * https://github.com/Gandi/api-examples/blob/master/bash/livedns/mywanip.sh
 #
 
-# Gandi livedns API KEY
+# Gandi v5 API KEY
 apikey=${apikey:-""}
 # Static domain
 domain=${domain:-""}
@@ -64,7 +64,7 @@ function validate_ipv6 {
 
 
 function usage {
-  echo 
+  echo
   echo "${0}"
   echo "    Create and use a subdomain of your Gandi.Net domain for Dynamic DNS."
   echo
@@ -179,4 +179,3 @@ if [[ ! -z ${ipv6} ]]; then
        ${api}/livedns/domains/${domain}/records/${subdomain}/AAAA
   echo
 fi
-
