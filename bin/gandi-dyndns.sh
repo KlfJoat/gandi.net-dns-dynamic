@@ -27,8 +27,8 @@ api=${api:-https://api.gandi.net/v5/}
 # Verify script requirements
 my_needed_commands="curl"
 missing_counter=0
-for needed_command in $my_needed_commands; do
-  if ! hash "$needed_command" >/dev/null 2>&1; then
+for needed_command in ${my_needed_commands}; do
+  if ! hash "${needed_command}" >/dev/null 2>&1; then
     echo "ERROR: Command not found in PATH: ${needed_command}" >&2
     ((missing_counter++))
   fi
@@ -43,7 +43,7 @@ function validate_ipv4 {
     local ip_addr="${1}"
     # Test for a valid IPv4 segment
     local ipv4seg='(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
-    if [[ ! ${ip_addr} =~ ^($ipv4seg\.){3,3}$ipv4seg$ ]]; then
+    if [[ ! ${ip_addr} =~ ^(${ipv4seg}\.){3,3}${ipv4seg}$ ]]; then
         echo "ERROR: ${ip_addr} is not valid. Aborting..." >&2
         exit 1
     fi
@@ -53,10 +53,12 @@ function validate_ipv6 {
     # Regex from https://stackoverflow.com/a/17871737/3661441
     local ip_addr="${1}"
     # Test for a valid IPv6 segment
+    # shellcheck disable=SC2034   # Because it doesn't actual evaluate code, Shellcheck cannot tell that this is used.
     local ipv6seg='[0-9a-fA-F]{1,4}'
     # Subset of the regex; we don't need to accept any of the IPv6/IPv4 combos.
+    # shellcheck disable=SC2016   # Because of doubly-nested quoting, Shellcheck cannot tell that this will be properly used.
     local ipv6addr='^(($ipv6seg:){7,7}$ipv6seg|($ipv6seg:){1,7}:|($ipv6seg:){1,6}:$ipv6seg|($ipv6seg:){1,5}(:$ipv6seg){1,2}|($ipv6seg:){1,4}(:$ipv6seg){1,3}|($ipv6seg:){1,3}(:$ipv6seg){1,4}|($ipv6seg:){1,2}(:$ipv6seg){1,5}|$ipv6seg:((:$ipv6seg){1,6})|:((:$ipv6seg){1,7}|:)$'
-    if [[ ! ${ip_addr} =~ $ipv6addr ]]; then
+    if [[ ! ${ip_addr} =~ ${ipv6addr} ]]; then
         echo "ERROR: ${ip_addr} is not valid. Aborting..." >&2
         exit 1
     fi
@@ -69,7 +71,7 @@ function usage {
   echo "    Create and use a subdomain of your Gandi.Net domain for Dynamic DNS."
   echo
   echo "Usage"
-  echo "  ${0} [--apikey <API_KEY>] [--domain <example.net>] [--hostname $(hostname --short)] [--help]"
+  echo "  ${0} [--apikey <API_KEY>] [--domain <example.net>] [--hostname $(hostname --short ||true)] [--help]"
   echo
   echo "You can also pass optional parameters via command-line or environment"
   echo "  --apikey    : Gandi.net API token."
@@ -84,7 +86,7 @@ function usage {
 }
 
 # Check for parameters
-while [ $# -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
   case "${1}" in
     --apikey)
       apikey="$2"
@@ -123,14 +125,14 @@ if [[ -z "${subdomain}" ]]; then
   argerr=1
 fi
 
-if [[ ! -z ${argerr} ]]; then
+if [[ -n ${argerr} ]]; then
   echo "Argument errors. Aborting..." >&2
   exit 1
 fi
 
 # Get current Internet-facing IP addresses.
-ipv4=$(curl --silent --ipv4 ${ip_service})
-ipv6=$(curl --silent --ipv6 ${ip_service})
+ipv4=$(curl --silent --ipv4 "${ip_service}")
+ipv6=$(curl --silent --ipv6 "${ip_service}")
 
 # Ensure that we got something from at least one of them
 if [[ -z ${ipv4} && -z ${ipv6} ]]; then
@@ -139,19 +141,19 @@ if [[ -z ${ipv4} && -z ${ipv6} ]]; then
 fi
 
 # Validate IPv4 address.
-if [[ ! -z $ipv4 ]]; then
+if [[ -n ${ipv4} ]]; then
   validate_ipv4 "${ipv4}"
 fi
 
 # Validate IPv6 address.
-if [[ ! -z $ipv6 ]]; then
+if [[ -n ${ipv6} ]]; then
   validate_ipv6 "${ipv6}"
 fi
 
 AuthZ="Authorization: Apikey ${apikey}"
 
 # Update IPv4
-if [[ ! -z ${ipv4} ]]; then
+if [[ -n ${ipv4} ]]; then
   echo "Setting ${subdomain}.${domain} to ${ipv4}"
 
   data='{"rrset_ttl": '${ttl}', "rrset_values": ["'${ipv4}'"]}'
@@ -161,12 +163,12 @@ if [[ ! -z ${ipv4} ]]; then
        --header "Content-Type: application/json" \
        --header "${AuthZ}" \
        --data "${data}" \
-       ${api}/livedns/domains/${domain}/records/${subdomain}/A
+       "${api}"/livedns/domains/"${domain}"/records/"${subdomain}"/A
   echo
 fi
 
 # Update IPv6
-if [[ ! -z ${ipv6} ]]; then
+if [[ -n ${ipv6} ]]; then
   echo "Setting ${subdomain}.${domain} to ${ipv6}"
 
   data='{"rrset_ttl": '${ttl}', "rrset_values": ["'${ipv6}'"]}'
@@ -176,6 +178,6 @@ if [[ ! -z ${ipv6} ]]; then
        --header "Content-Type: application/json" \
        --header "${AuthZ}" \
        --data "${data}" \
-       ${api}/livedns/domains/${domain}/records/${subdomain}/AAAA
+       "${api}"/livedns/domains/"${domain}"/records/"${subdomain}"/AAAA
   echo
 fi
