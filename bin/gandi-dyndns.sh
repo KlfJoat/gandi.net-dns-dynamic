@@ -44,7 +44,7 @@ function validate_ipv4 {
     # Test for a valid IPv4 segment
     local ipv4seg='(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
     if [[ ! ${ip_addr} =~ ^(${ipv4seg}\.){3,3}${ipv4seg}$ ]]; then
-        echo "ERROR: ${ip_addr} is not valid. Aborting..." >&2
+        echo "ERROR: ${ip_addr} is not a valid IPv4 address. Aborting..." >&2
         exit 1
     fi
 }
@@ -59,7 +59,7 @@ function validate_ipv6 {
     # shellcheck disable=SC2016   # Because of doubly-nested quoting, Shellcheck cannot tell that this will be properly used.
     local ipv6addr='^(($ipv6seg:){7,7}$ipv6seg|($ipv6seg:){1,7}:|($ipv6seg:){1,6}:$ipv6seg|($ipv6seg:){1,5}(:$ipv6seg){1,2}|($ipv6seg:){1,4}(:$ipv6seg){1,3}|($ipv6seg:){1,3}(:$ipv6seg){1,4}|($ipv6seg:){1,2}(:$ipv6seg){1,5}|$ipv6seg:((:$ipv6seg){1,6})|:((:$ipv6seg){1,7}|:)$'
     if [[ ! ${ip_addr} =~ ${ipv6addr} ]]; then
-        echo "ERROR: ${ip_addr} is not valid. Aborting..." >&2
+        echo "ERROR: ${ip_addr} is not a valid IPv6 address. Aborting..." >&2
         exit 1
     fi
 }
@@ -103,7 +103,7 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       usage;;
     *)
-      echo "ERROR: \"${1}\" is not supported."
+      echo "ERROR: \"${1}\" is not supported." >&2
       usage;;
   esac
 done
@@ -131,12 +131,17 @@ if [[ -n ${argerr} ]]; then
 fi
 
 # Get current Internet-facing IP addresses.
+echo "Fetching IPv4 address"
 ipv4=$(curl --silent --ipv4 "${ip_service}")
+echo "Fetched '${ipv4}' as IPv4 address"
+
+echo "Fetching IPv6 address"
 ipv6=$(curl --silent --ipv6 "${ip_service}")
+echo "Fetched '${ipv6}' as IPv6 address"
 
 # Ensure that we got something from at least one of them
 if [[ -z ${ipv4} && -z ${ipv6} ]]; then
-  echo "Something went wrong. Can not get your IP (v4 or v6) from ${ip_service}"
+  echo "Something went wrong. Can not get your IP (v4 or v6) from ${ip_service}! Aborting..." >&2
   exit 1
 fi
 
