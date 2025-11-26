@@ -25,7 +25,7 @@ api=${api:-https://api.gandi.net/v5/}
 
 
 # Verify script requirements
-my_needed_commands="curl"
+my_needed_commands="curl ip jq"
 missing_counter=0
 for needed_command in ${my_needed_commands}; do
   if ! hash "${needed_command}" >/dev/null 2>&1; then
@@ -49,19 +49,68 @@ function validate_ipv4 {
     fi
 }
 
-function validate_ipv6 {
-    # Regex from https://stackoverflow.com/a/17871737/3661441
-    local ip_addr="${1}"
-    # Test for a valid IPv6 segment
-    # shellcheck disable=SC2034   # Because it doesn't actual evaluate code, Shellcheck cannot tell that this is used.
-    local ipv6seg='[0-9a-fA-F]{1,4}'
-    # Subset of the regex; we don't need to accept any of the IPv6/IPv4 combos.
-    # shellcheck disable=SC2016   # Because of doubly-nested quoting, Shellcheck cannot tell that this will be properly used.
-    local ipv6addr='^(($ipv6seg:){7,7}$ipv6seg|($ipv6seg:){1,7}:|($ipv6seg:){1,6}:$ipv6seg|($ipv6seg:){1,5}(:$ipv6seg){1,2}|($ipv6seg:){1,4}(:$ipv6seg){1,3}|($ipv6seg:){1,3}(:$ipv6seg){1,4}|($ipv6seg:){1,2}(:$ipv6seg){1,5}|$ipv6seg:((:$ipv6seg){1,6})|:((:$ipv6seg){1,7}|:)$'
-    if [[ ! ${ip_addr} =~ ${ipv6addr} ]]; then
-        echo "ERROR: ${ip_addr} is not a valid IPv6 address. Aborting..." >&2
-        exit 1
-    fi
+
+# @description Test if something is an IPv6 address.
+# See if the argument is an IPv6 address. This works by using `ip`.
+# This is the most robust test bc it uses an external program that MUST be correct.
+# It is also the most fragile bc it's non-portable.
+#
+# @arg 1 string String to test.
+# @exitcode 0 Address passed validation
+# @exitcode 1 Address failed validation
+# @see [POSIX shell compatible IPv6 expand/compress](https://stackoverflow.com/a/76164024/3661441)
+validate_ipv6() {
+  # shellcheck disable=SC2292  # This is designed for /bin/sh, not just bash.
+  if ! ip -family inet6 route get "${1}" >/dev/null 2>/dev/null ; then
+      echo -E "ERROR: '${1}' is not a valid IPv6 address. Aborting..." >&2
+      exit 1
+  fi
+  return 0
+}
+
+
+# @description Test if IPv6 address passed in is a ULA or not.
+# Unique Local Addresses have 'scope global' in Linux, so a straight
+# address check is the only way to identify them.
+# ULAs fall under fc00::/7, so that's fc00::/8 and fd00::/8.
+#
+# @example
+#
+#     if is_ipv6_ula "fddd:aaaa:bbbb:cccc:55ae:bdb2:5b39:d6d5"; then...
+#
+# @arg $1 string IPv6 address to test the first two characters of.
+# @exitcode 0 Address *IS* a Unique Local Address (first 2 chars are 'fc' or 'fd')
+# @exitcode 1 Address is *NOT* a Unique Local Address (first 2 chars are NOT 'fc' or 'fd')
+# @see https://en.wikipedia.org/wiki/Unique_local_address
+# @test ===
+is_ipv6_ula() {
+  if [[ "${1}" == fd* ]] || [[ "${1}" == fc* ]]; then
+    return 0
+  fi
+  return 1
+}
+
+
+# @description Get device IPv6 addresses that are global scoped and privacy template flagged.
+#
+# @example
+#     mapfile -d '' ipv6_globaltemplate < <( get_ipv6_globaltemplate enp4s0 )
+#     #wait "$!"  # use in bash-4.4+ to get exit status of the process substitution
+#
+# @arg $1 string Optional interface name to scope down the list.
+# @stdout Null-terminated list of IPv6 addresses, optionally scoped to $1
+# @test ===
+# shellcheck disable=SC2120   # The arguments are optional
+get_ipv6_globaltemplate() {
+  local iface
+  iface=''
+  if [[ -n "${1}" ]]; then
+    iface="dev ${1}"
+  fi
+
+  # shellcheck disable=SC2312,SC2086   # If `ip` throws an error, we'll see no or bad output; I want word splitting
+  ip -family inet6 -json address ${iface} show scope global mngtmpaddr \
+  | jq --raw-output0 '.[].addr_info.[].local | select(.!=null)'
 }
 
 
@@ -136,7 +185,18 @@ ipv4=$(curl --silent --ipv4 "${ip_service}")
 echo "Fetched '${ipv4}' as IPv4 address"
 
 echo "Fetching IPv6 address"
-ipv6=$(curl --silent --ipv6 "${ip_service}")
+declare -a ipv6addrs
+declare ipv6iface
+# shellcheck disable=SC2312   # It's okay if this returns blank or error
+mapfile -d '' ipv6addrs < <( get_ipv6_globaltemplate )
+for i in "${ipv6addrs[@]}"; do
+  if ! is_ipv6_ula "${i}"; then
+    ipv6iface="${i}"
+    # Only return the first ipv6 address since we can only set one
+    break
+  fi
+done
+ipv6=$(curl --silent --ipv6 --interface "${ipv6iface}" "${ip_service}")
 echo "Fetched '${ipv6}' as IPv6 address"
 
 # Ensure that we got something from at least one of them
