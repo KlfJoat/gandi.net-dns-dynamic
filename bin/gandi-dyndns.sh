@@ -1,13 +1,10 @@
 #!/bin/bash
 #
-# gandi-dyndns.sh
-#     Use a Gandi.Net subdomain you own as a replacement for a DynDNS host.
+# @file gandi-dyndns.sh
+# @brief Use a Gandi.Net subdomain you own as a replacement for a DynDNS host.
 #
-# Uses:
-#  * https://api.gandi.net/docs/
-#
-# Shamelessly cribbing
-#  * https://github.com/Gandi/api-examples/blob/master/bash/livedns/mywanip.sh
+# @see https://api.gandi.net/docs/
+# @see Shamelessly cribbed from https://github.com/Gandi/api-examples/blob/master/bash/livedns/mywanip.sh
 #
 
 # Gandi v5 API KEY
@@ -38,15 +35,23 @@ if ((missing_counter > 0)); then
   exit 1
 fi
 
-function validate_ipv4 {
-    # Regex from https://stackoverflow.com/a/17871737/3661441
-    local ip_addr="${1}"
-    # Test for a valid IPv4 segment
-    local ipv4seg='(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
-    if [[ ! ${ip_addr} =~ ^(${ipv4seg}\.){3,3}${ipv4seg}$ ]]; then
-        echo "ERROR: ${ip_addr} is not a valid IPv4 address. Aborting..." >&2
-        exit 1
-    fi
+
+# @description Test if something is an IPv4 address.
+# See if the argument is an IPv4 address.
+#
+# @arg 1 string String to test.
+# @exitcode 0 Address passed validation
+# @exitcode 1 Address failed validation
+validate_ipv4() {
+  # Regex from https://stackoverflow.com/a/17871737/3661441
+  local ip_addr="${1}"
+  # Test for a valid IPv4 segment
+  local ipv4seg='(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
+  if [[ ! ${ip_addr} =~ ^(${ipv4seg}\.){3,3}${ipv4seg}$ ]]; then
+      echo "ERROR: ${ip_addr} is not a valid IPv4 address. Aborting..." >&2
+      exit 1
+  fi
+  return 0
 }
 
 
@@ -114,7 +119,8 @@ get_ipv6_globaltemplate() {
 }
 
 
-function usage {
+# @description Show usage information, then exit.
+usage() {
   echo
   echo "${0}"
   echo "    Create and use a subdomain of your Gandi.Net domain for Dynamic DNS."
@@ -131,7 +137,7 @@ function usage {
   echo
   echo "View source for more options or to embed options."
   echo
-  exit 1
+  exit 0
 }
 
 # Check for parameters
