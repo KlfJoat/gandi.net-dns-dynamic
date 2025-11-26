@@ -225,7 +225,7 @@ AuthZ="Authorization: Apikey ${apikey}"
 
 # Update IPv4
 if [[ -n ${ipv4} ]]; then
-  echo "Setting ${subdomain}.${domain} to ${ipv4}"
+  echo "Setting ${subdomain}.${domain} A record to ${ipv4}"
 
   data='{"rrset_ttl": '${ttl}', "rrset_values": ["'${ipv4}'"]}'
   # Note that PUT works for subdomain creation exactly like POST does.
@@ -240,7 +240,7 @@ fi
 
 # Update IPv6
 if [[ -n ${ipv6} ]]; then
-  echo "Setting ${subdomain}.${domain} to ${ipv6}"
+  echo "Setting ${subdomain}.${domain} AAAA record to ${ipv6}"
 
   data='{"rrset_ttl": '${ttl}', "rrset_values": ["'${ipv6}'"]}'
   # Note that PUT works for subdomain creation exactly like POST does.
