@@ -1,5 +1,5 @@
 NAME=gandi-dyndns
-VERSION=0.4.1
+VERSION=0.5
 
 # REMINDER:  MAKEFILE NEEDS TABS!!!
 # cat -e -t -v Makefile
