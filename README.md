@@ -45,6 +45,7 @@ See the script itself for all configuration options at the top.
 
 1. I should really create a dotfile for the configuration of this.
 2. I should make the Setup section above clearer and more step-by-step.
+3. I should potentially use the [systemd Credentials mechanism](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Credentials) to pass in the API key, and possibly other info.
 
 ## Contributions
 
