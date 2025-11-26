@@ -8,17 +8,23 @@
 #
 
 # Gandi v5 API KEY
-apikey=${apikey:-""}
+apikey=${GANDI_DYNDNS_APIKEY:-""}
+echo "apikey='${apikey}'"
 # Static domain
-domain=${domain:-""}
+domain=${GANDI_DYNDNS_DOMAIN:-""}
+echo "domain='${domain}'"
 # Dynamic subdomain
-subdomain=${subdomain:-$(hostname --short)}
+subdomain=${GANDI_DYNDNS_SUBDOMAIN:-$(hostname --short)}
+echo "subdomain='${subdomain}'"
 # Set TTL (default 30m/1800s)
-ttl=${ttl:-1800}
+ttl=${GANDI_DYNDNS_TTL:-1800}
+echo "ttl='${ttl}'"
 # IP service
-ip_service=${ip_service:-http://me.gandi.net}
+ip_service=${GANDI_DYNDNS_IPSERVICE:-http://me.gandi.net}
+echo "ip_service='${ip_service}'"
 # API base
-api=${api:-https://api.gandi.net/v5/}
+api=${GANDI_DYNDNS_API:-https://api.gandi.net/v5/}
+echo "api='${api}'"
 
 
 # Verify script requirements
@@ -42,6 +48,7 @@ fi
 # @arg 1 string String to test.
 # @exitcode 0 Address passed validation
 # @exitcode 1 Address failed validation
+# @test UNTESTED
 validate_ipv4() {
   # Regex from https://stackoverflow.com/a/17871737/3661441
   local ip_addr="${1}"
@@ -64,6 +71,7 @@ validate_ipv4() {
 # @exitcode 0 Address passed validation
 # @exitcode 1 Address failed validation
 # @see [POSIX shell compatible IPv6 expand/compress](https://stackoverflow.com/a/76164024/3661441)
+# @test Tested in external library
 validate_ipv6() {
   # shellcheck disable=SC2292  # This is designed for /bin/sh, not just bash.
   if ! ip -family inet6 route get "${1}" >/dev/null 2>/dev/null ; then
@@ -87,7 +95,7 @@ validate_ipv6() {
 # @exitcode 0 Address *IS* a Unique Local Address (first 2 chars are 'fc' or 'fd')
 # @exitcode 1 Address is *NOT* a Unique Local Address (first 2 chars are NOT 'fc' or 'fd')
 # @see https://en.wikipedia.org/wiki/Unique_local_address
-# @test ===
+# @test UNTESTED
 is_ipv6_ula() {
   if [[ "${1,,}" == fd* ]] || [[ "${1,,}" == fc* ]]; then
     return 0
@@ -104,7 +112,7 @@ is_ipv6_ula() {
 #
 # @arg $1 string Optional interface name to scope down the list.
 # @stdout Null-terminated list of IPv6 addresses, optionally scoped to $1
-# @test ===
+# @test UNTESTED
 # shellcheck disable=SC2120   # The arguments are optional
 get_ipv6_globaltemplate() {
   local iface
@@ -120,6 +128,9 @@ get_ipv6_globaltemplate() {
 
 
 # @description Show usage information, then exit.
+# @noargs
+# @stdout Usage message
+# @exitcode 0 Always
 usage() {
   echo
   echo "${0}"

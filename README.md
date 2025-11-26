@@ -36,15 +36,16 @@ make install
 
 1. Go to Gandi.Net
 2. Create an API key
-3. Configure the API key in the `systemd` service or in the script itself
-4. Configure the domain in the `systemd` service or in the script itself
-5. Choose a subdomain (defaults to `hostname --short`) and configure it if necessary
-
-See the script itself for all configuration options at the top.
+3. Configure the API key & domain in the `systemd` environment file at `$XDG_CONFIG_HOME/gandi-dyndns.conf` or in the script itself
+4. Further optional configuration can be performed in the `systemd` environment file at `$XDG_CONFIG_HOME/gandi-dyndns.conf` or in the script itself
+    * Subdomain - defaults to `hostname --short`
+    * DNS record TTL (in seconds) - defaults to 1800 (30 minutes)
+    * Service to get your external IP address - defaults to `me.gandi.net`
+    * API endpoint - defaults to `api.gandi.net/v5/`. Override this to test using the Gandi API Sandbox at `api.sandbox.gandi.net/v5/`.
 
 ## Future Enhancements
 
-1. I should really use the [systemd Credentials mechanism](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Credentials) to pass in the API key, and possibly other info.
+1. Due to a bug in `systemd` 257, it is not currently (Ubuntu 2025.11) possible to use the nifty [systemd Credentials mechanism](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Credentials) to pass in the API key.
 2. I should make the Setup section above clearer and more step-by-step.
 
 ## Contributions
