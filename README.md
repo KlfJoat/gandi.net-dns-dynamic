@@ -18,6 +18,7 @@ I got a renewal notice for DynDNS.com and noticed that the cost had shot up prec
 * Accepts necessary parameters (API key, domain name, subdomain)
 * Determines your IPv4 and/or IPv6 address
 * Submits those 4 pieces of information to Gandi.Net to create or update an A and/or AAAA record with a TTL of 30m
+* Expects every invocation to run like `systemd start --user gandi-dyndns.service` (no standalone execution)
 
 ## Installation
 
@@ -43,9 +44,8 @@ See the script itself for all configuration options at the top.
 
 ## Future Enhancements
 
-1. I should really create a dotfile for the configuration of this.
+1. I should really use the [systemd Credentials mechanism](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Credentials) to pass in the API key, and possibly other info.
 2. I should make the Setup section above clearer and more step-by-step.
-3. I should potentially use the [systemd Credentials mechanism](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Credentials) to pass in the API key, and possibly other info.
 
 ## Contributions
 
