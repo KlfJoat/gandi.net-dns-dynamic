@@ -84,7 +84,7 @@ validate_ipv6() {
 # @see https://en.wikipedia.org/wiki/Unique_local_address
 # @test ===
 is_ipv6_ula() {
-  if [[ "${1}" == fd* ]] || [[ "${1}" == fc* ]]; then
+  if [[ "${1,,}" == fd* ]] || [[ "${1,,}" == fc* ]]; then
     return 0
   fi
   return 1
