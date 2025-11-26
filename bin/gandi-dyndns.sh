@@ -188,7 +188,7 @@ fi
 # Get current Internet-facing IP addresses.
 echo "Fetching IPv4 address"
 ipv4=$(curl --silent --ipv4 "${ip_service}")
-echo "Fetched '${ipv4}' as IPv4 address"
+echo "Fetched '${ipv4}' as publicly-accessible IPv4 address"
 
 echo "Fetching IPv6 address"
 declare -a ipv6addrs
@@ -203,11 +203,11 @@ for i in "${ipv6addrs[@]}"; do
   fi
 done
 ipv6=$(curl --silent --ipv6 --interface "${ipv6iface}" "${ip_service}")
-echo "Fetched '${ipv6}' as IPv6 address"
+echo "Fetched '${ipv6}' as publicly-accessible IPv6 address"
 
 # Ensure that we got something from at least one of them
 if [[ -z ${ipv4} && -z ${ipv6} ]]; then
-  echo "Something went wrong. Can not get your IP (v4 or v6) from ${ip_service}! Aborting..." >&2
+  echo "Something went wrong. Can not get your publicly-accessible IP (v4 or v6) from ${ip_service}! Aborting..." >&2
   exit 1
 fi
 
